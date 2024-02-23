@@ -1,7 +1,7 @@
 <section class="flex items-center justify-center h-screen">
   <div class="border-2 rounded border-gray-400 bg-slate-100 p-8 flex flex-col justify-center items-center">
     <h1 class="text-3xl font-bold text-center mb-4">⏰ Laboral Timer</h1>
-    <button pButton type="button" class="m-3">
+    <button pButton type="button" class="m-3" (click)="start()">
       <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-play-circle-fill" viewBox="0 0 16 16">
         <path d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0M6.79 5.093A.5.5 0 0 0 6 5.5v5a.5.5 0 0 0 .79.407l3.5-2.5a.5.5 0 0 0 0-.814z"/>
       </svg>
@@ -20,7 +20,7 @@
       </svg>
       <span class="ml-3">Reanudar la jornada laboral</span>
     </p-button>
-    <p class="text-3xl font-bold">00:00</p>
+    <p class="text-3xl font-bold">{{ timer }}</p>
     <div class="border rounded border-gray-400 m-4 p-2">
       <app-date-time></app-date-time>
     </div>
