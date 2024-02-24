@@ -28,30 +28,35 @@ export class LaboralTimerComponent{
     pause: false,
     reset: false
   }
+  interval: any;
 
   start() {
-    setInterval(() => {
+    this.interval = setInterval(() => {
       this.time++;
       this.timer = this.formatTime(this.time);
     }, 1000);
-    this.saveCurrentDateTime();
+    this.saveCurrentDateTime(States.Start);
     this.displayButtons.start = false;
-  }
-
-  stop() {
-    console.log('stop');
+    this.displayButtons.pause = true;
+    this.displayButtons.stop = true;
   }
 
   pause() {
-    console.log('pause');
+    clearInterval(this.interval);
+    this.saveCurrentDateTime(States.Pause);
+    this.displayButtons.start = true;
+    this.displayButtons.pause = false;
+    this.displayButtons.stop = false;
   }
 
-  restart() {
-    console.log('restart');
-  }
-
-  reset() {
-    console.log('reset');
+  stop() {
+    clearInterval(this.interval);
+    this.time = 0;
+    this.timer = this.formatTime(this.time);
+    this.saveCurrentDateTime(States.Stop);
+    this.displayButtons.start = true;
+    this.displayButtons.pause = false;
+    this.displayButtons.stop = false;
   }
 
   formatTime(seconds: number): string {
@@ -64,7 +69,7 @@ export class LaboralTimerComponent{
     return `${hrsString}:${minsString}:${secsString}`;
   }
 
-  saveCurrentDateTime() {
+  saveCurrentDateTime(state: States) {
     const now = new Date();
     const date = now.toISOString().split('T')[0]; // Fecha en formato YYYY-MM-DD
     const time = now.toTimeString().split(' ')[0]; // Hora en formato HH:MM:SS
