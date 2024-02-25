@@ -1,4 +1,5 @@
-import { Component, ElementRef, ViewChild } from '@angular/core';
+import { Class } from './../../../../node_modules/@types/estree/index.d';
+import { Component, ElementRef, OnInit, ViewChild } from '@angular/core';
 import { ButtonModule } from 'primeng/button';
 import { DateTimeComponent } from '../date-time/date-time.component';
 import { CommonModule } from '@angular/common';
@@ -10,6 +11,16 @@ export enum States {
   Stop = 'stop'
 }
 
+export interface Item {
+  dateTime: Date;
+  state: string;
+}
+export interface ParentItem {
+  items: Item[];
+  current: boolean;
+}
+
+
 @Component({
   selector: 'app-laboral-timer',
   standalone: true,
@@ -18,17 +29,21 @@ export enum States {
   styleUrl: './laboral-timer.component.css'
 })
 
-export class LaboralTimerComponent{
-
-  time:number = 0;
-  timer: string = "00:00:00"
+export class LaboralTimerComponent implements OnInit {
+  time: number = 0;
+  timer: string = '00:00:00';
   displayButtons = {
     start: true,
     stop: false,
     pause: false,
-    reset: false
-  }
+    reset: false,
+  };
   interval: any;
+  savedItems: ParentItem[] = [];
+
+  ngOnInit(): void {
+    this.readLocaStorage();
+  }
 
   start() {
     this.interval = setInterval(() => {
@@ -70,11 +85,29 @@ export class LaboralTimerComponent{
   }
 
   saveCurrentDateTime(state: States) {
-    const now = new Date();
-    const date = now.toISOString().split('T')[0]; // Fecha en formato YYYY-MM-DD
-    const time = now.toTimeString().split(' ')[0]; // Hora en formato HH:MM:SS
-    localStorage.setItem('start', `{date: ${date}, time: ${time}`);
+    const item: Item = {
+      dateTime: new Date(),
+      state: state
+    };
+    // TODO: current & save the corrent object
+    const parentItem: ParentItem = {
+      items: [item],
+      current: true
+    };
+    this.savedItems.push(parentItem);
+    localStorage.setItem('data', JSON.stringify(this.savedItems));
   }
 
+  readLocaStorage() {
+    const lsData = localStorage.getItem('data');
+    if (lsData) {
+      const data = JSON.parse(lsData);
+      data.forEach((item: any) => {
+        // TODO: save the parsed data into the savedItems array
+        console.log(item);
+      });
+
+    }
+  }
 }
 
