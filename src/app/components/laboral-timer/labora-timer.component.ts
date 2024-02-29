@@ -85,16 +85,14 @@ export class LaboralTimerComponent implements OnInit {
   }
 
   saveCurrentDateTime(state: States) {
-    const item: Item = {
-      dateTime: new Date(),
-      state: state
-    };
-    // TODO: current & save the corrent object
-    const parentItem: ParentItem = {
-      items: [item],
-      current: true
-    };
-    this.savedItems.push(parentItem);
+    //TODO
+    const current = this.savedItems.find(item => item.current);
+    if (current) {
+      current.items.push({
+        dateTime: new Date(),
+        state: state
+      });
+    }
     localStorage.setItem('data', JSON.stringify(this.savedItems));
   }
 
