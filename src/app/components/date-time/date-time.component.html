@@ -1,1 +1,7 @@
-{{ fechaHora$ | async | date: '📅 dd/MM/yyyy - ⏰ h:mm:ss a' }}
+<ng-container *ngIf="!(fechaHora$ | async)">
+  🥤 Cargando fecha y hora...
+</ng-container>
+
+<ng-container *ngIf="fechaHora$ | async as fechaHora">
+  {{ fechaHora | date: '📅 dd/MM/yyyy - ⏰ h:mm:ss a' }}
+</ng-container>

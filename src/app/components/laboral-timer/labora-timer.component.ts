@@ -42,7 +42,7 @@ export class LaboralTimerComponent implements OnInit {
   savedItems: ParentItem[] = [];
 
   ngOnInit(): void {
-    this.readLocaStorage();
+    this.readLocalStorage();
   }
 
   start() {
@@ -98,16 +98,17 @@ export class LaboralTimerComponent implements OnInit {
     localStorage.setItem('data', JSON.stringify(this.savedItems));
   }
 
-  readLocaStorage() {
+  readLocalStorage() {
     const lsData = localStorage.getItem('data');
     if (lsData) {
-      const data = JSON.parse(lsData);
-      data.forEach((item: any) => {
-        // TODO: save the parsed data into the savedItems array
-        console.log(item);
-      });
-
+      this.savedItems = JSON.parse(lsData).map((dat: any) => ({
+        items: dat.items.map((item: any) => ({
+          dateTime: new Date(item.dateTime),
+          state: item.state
+        })),
+        current: dat.current
+      }));
+      console.log(this.savedItems);
     }
   }
 }
-
