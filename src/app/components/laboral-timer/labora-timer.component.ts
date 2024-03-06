@@ -1,4 +1,5 @@
-import { Component, ElementRef, ViewChild } from '@angular/core';
+import { Class } from './../../../../node_modules/@types/estree/index.d';
+import { Component, ElementRef, OnInit, ViewChild } from '@angular/core';
 import { ButtonModule } from 'primeng/button';
 import { DateTimeComponent } from '../date-time/date-time.component';
 import { CommonModule } from '@angular/common';
@@ -10,6 +11,16 @@ export enum States {
   Stop = 'stop'
 }
 
+export interface Item {
+  dateTime: Date;
+  state: string;
+}
+export interface ParentItem {
+  items: Item[];
+  current: boolean;
+}
+
+
 @Component({
   selector: 'app-laboral-timer',
   standalone: true,
@@ -18,17 +29,21 @@ export enum States {
   styleUrl: './laboral-timer.component.css'
 })
 
-export class LaboralTimerComponent{
-
-  time:number = 0;
-  timer: string = "00:00:00"
+export class LaboralTimerComponent implements OnInit {
+  time: number = 0;
+  timer: string = '00:00:00';
   displayButtons = {
     start: true,
     stop: false,
     pause: false,
-    reset: false
-  }
+    reset: false,
+  };
   interval: any;
+  savedItems: ParentItem[] = [];
+
+  ngOnInit(): void {
+    this.readLocalStorage();
+  }
 
   start() {
     this.interval = setInterval(() => {
@@ -69,12 +84,40 @@ export class LaboralTimerComponent{
     return `${hrsString}:${minsString}:${secsString}`;
   }
 
-  saveCurrentDateTime(state: States) {
-    const now = new Date();
-    const date = now.toISOString().split('T')[0]; // Fecha en formato YYYY-MM-DD
-    const time = now.toTimeString().split(' ')[0]; // Hora en formato HH:MM:SS
-    localStorage.setItem('start', `{date: ${date}, time: ${time}`);
+  createNewState(state: States) {
+    return {
+      dateTime: new Date(),
+      state: state
+    };
   }
 
-}
+  saveCurrentDateTime(state: States) {
+    let current = this.savedItems.find(item => item.current);
+    if (current) {
+      current.items.push(this.createNewState(state));
+      if (state === States.Stop) {
+        current.current = false;
+      }
+    } else {
+      this.savedItems.push({
+        items: [this.createNewState(state)],
+        current: true
+      });
+    }
+    console.log(this.savedItems);
+    localStorage.setItem('data', JSON.stringify(this.savedItems));
+  }
 
+  readLocalStorage() {
+    const lsData = localStorage.getItem('data');
+    if (lsData) {
+      this.savedItems = JSON.parse(lsData).map((dat: any) => ({
+        items: dat.items.map((item: any) => ({
+          dateTime: new Date(item.dateTime),
+          state: item.state
+        })),
+        current: dat.current
+      }));
+    }
+  }
+}
