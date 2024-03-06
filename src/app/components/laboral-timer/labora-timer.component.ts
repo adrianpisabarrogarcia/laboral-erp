@@ -84,15 +84,27 @@ export class LaboralTimerComponent implements OnInit {
     return `${hrsString}:${minsString}:${secsString}`;
   }
 
+  createNewState(state: States) {
+    return {
+      dateTime: new Date(),
+      state: state
+    };
+  }
+
   saveCurrentDateTime(state: States) {
-    //TODO
-    const current = this.savedItems.find(item => item.current);
+    let current = this.savedItems.find(item => item.current);
     if (current) {
-      current.items.push({
-        dateTime: new Date(),
-        state: state
+      current.items.push(this.createNewState(state));
+      if (state === States.Stop) {
+        current.current = false;
+      }
+    } else {
+      this.savedItems.push({
+        items: [this.createNewState(state)],
+        current: true
       });
     }
+    console.log(this.savedItems);
     localStorage.setItem('data', JSON.stringify(this.savedItems));
   }
 
@@ -106,7 +118,6 @@ export class LaboralTimerComponent implements OnInit {
         })),
         current: dat.current
       }));
-      console.log(this.savedItems);
     }
   }
 }
