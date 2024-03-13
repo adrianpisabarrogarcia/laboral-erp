@@ -1,7 +1,7 @@
 import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterOutlet } from '@angular/router';
-import { LaboralTimerComponent } from './components/laboral-timer/labora-timer.component';
+import { LaboralTimerComponent } from './components/laboral-timer/laboral-timer.component';
 
 @Component({
   selector: 'app-root',
