@@ -1,9 +1,7 @@
-import { Class } from './../../../../node_modules/@types/estree/index.d';
-import { Component, ElementRef, OnInit, ViewChild } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { ButtonModule } from 'primeng/button';
 import { DateTimeComponent } from '../date-time/date-time.component';
 import { CommonModule } from '@angular/common';
-
 
 export enum States {
   Start = 'start',
@@ -19,7 +17,6 @@ export interface ParentItem {
   items: Item[];
   current: boolean;
 }
-
 
 @Component({
   selector: 'app-laboral-timer',
@@ -45,20 +42,20 @@ export class LaboralTimerComponent implements OnInit {
     this.readLocalStorage();
   }
 
-  start() {
+  start(save: boolean = true) {
     this.interval = setInterval(() => {
       this.time++;
       this.timer = this.formatTime(this.time);
     }, 1000);
-    this.saveCurrentDateTime(States.Start);
+    if(save) this.saveCurrentDateTime(States.Start);
     this.displayButtons.start = false;
     this.displayButtons.pause = true;
     this.displayButtons.stop = true;
   }
 
-  pause() {
+  pause(save: boolean = true) {
     clearInterval(this.interval);
-    this.saveCurrentDateTime(States.Pause);
+    if(save) this.saveCurrentDateTime(States.Pause);
     this.displayButtons.start = true;
     this.displayButtons.pause = false;
     this.displayButtons.stop = false;
@@ -118,6 +115,37 @@ export class LaboralTimerComponent implements OnInit {
         })),
         current: dat.current
       }));
+      const current = this.savedItems.find(item => item.current);
+      if (current) {
+        this.displayButtons.start = false;
+        this.displayButtons.pause = true;
+        this.displayButtons.stop = true;
+        const sortedItems = current.items.sort((a, b) => a.dateTime.getTime() - b.dateTime.getTime());
+        let elapsedTime = 0;
+        sortedItems.forEach((item, index) => {
+          if (item.state === States.Start) {
+            const nextItem = sortedItems[index + 1];
+            if (nextItem && nextItem.state === States.Pause) {
+              elapsedTime += nextItem.dateTime.getTime() - item.dateTime.getTime();
+            } else if (nextItem && nextItem.state === States.Stop) {
+              elapsedTime += new Date().getTime() - item.dateTime.getTime();
+            } else if (nextItem === undefined) {
+              elapsedTime += new Date().getTime() - item.dateTime.getTime();
+            }
+          }
+        });
+        //from elapsedtime to seconds
+        this.time = Math.round(elapsedTime/1000);
+        console.log(this.time);
+        this.timer = this.formatTime(this.time);
+        const lastState = sortedItems[sortedItems.length - 1].state;
+        if (lastState === States.Start) {
+          this.start(false);
+        } else if (lastState === States.Pause) {
+          this.pause(false);
+        }
+
+      }
     }
   }
 }
