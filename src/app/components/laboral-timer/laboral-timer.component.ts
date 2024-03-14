@@ -23,7 +23,7 @@ export interface ParentItem {
   standalone: true,
   imports: [ButtonModule, DateTimeComponent, CommonModule],
   templateUrl: './laboral-timer.component.html',
-  styleUrl: './laboral-timer.component.css',
+  styleUrl: './laboral-timer.component.css'
 })
 export class LaboralTimerComponent implements OnInit {
   time: number = 0;
@@ -77,7 +77,7 @@ export class LaboralTimerComponent implements OnInit {
   createNewState(state: States) {
     return {
       dateTime: new Date(),
-      state: state,
+      state: state
     };
   }
 
@@ -91,7 +91,7 @@ export class LaboralTimerComponent implements OnInit {
     } else {
       this.savedItems.push({
         items: [this.createNewState(state)],
-        current: true,
+        current: true
       });
     }
     console.log(this.savedItems);
@@ -117,9 +117,9 @@ export class LaboralTimerComponent implements OnInit {
     return JSON.parse(lsData).map((dat: any) => ({
       items: dat.items.map((item: any) => ({
         dateTime: new Date(item.dateTime),
-        state: item.state,
+        state: item.state
       })),
-      current: dat.current,
+      current: dat.current
     }));
   }
 
