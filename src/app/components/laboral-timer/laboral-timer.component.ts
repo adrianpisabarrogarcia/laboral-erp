@@ -6,7 +6,7 @@ import { CommonModule } from '@angular/common';
 export enum States {
   Start = 'start',
   Pause = 'pause',
-  Stop = 'stop',
+  Stop = 'stop'
 }
 
 export interface Item {
@@ -32,7 +32,7 @@ export class LaboralTimerComponent implements OnInit {
     start: true,
     stop: false,
     pause: false,
-    reset: false,
+    reset: false
   };
   interval: any;
   savedItems: ParentItem[] = [];
