@@ -6,7 +6,7 @@ import { CommonModule } from '@angular/common';
 export enum States {
   Start = 'start',
   Pause = 'pause',
-  Stop = 'stop'
+  Stop = 'stop',
 }
 
 export interface Item {
@@ -23,9 +23,8 @@ export interface ParentItem {
   standalone: true,
   imports: [ButtonModule, DateTimeComponent, CommonModule],
   templateUrl: './laboral-timer.component.html',
-  styleUrl: './laboral-timer.component.css'
+  styleUrl: './laboral-timer.component.css',
 })
-
 export class LaboralTimerComponent implements OnInit {
   time: number = 0;
   timer: string = '00:00:00';
@@ -47,18 +46,14 @@ export class LaboralTimerComponent implements OnInit {
       this.time++;
       this.timer = this.formatTime(this.time);
     }, 1000);
-    if(save) this.saveCurrentDateTime(States.Start);
-    this.displayButtons.start = false;
-    this.displayButtons.pause = true;
-    this.displayButtons.stop = true;
+    if (save) this.saveCurrentDateTime(States.Start);
+    this.updateDisplayButtons(true);
   }
 
   pause(save: boolean = true) {
     clearInterval(this.interval);
-    if(save) this.saveCurrentDateTime(States.Pause);
-    this.displayButtons.start = true;
-    this.displayButtons.pause = false;
-    this.displayButtons.stop = false;
+    if (save) this.saveCurrentDateTime(States.Pause);
+    this.updateDisplayButtons(false);
   }
 
   stop() {
@@ -66,9 +61,7 @@ export class LaboralTimerComponent implements OnInit {
     this.time = 0;
     this.timer = this.formatTime(this.time);
     this.saveCurrentDateTime(States.Stop);
-    this.displayButtons.start = true;
-    this.displayButtons.pause = false;
-    this.displayButtons.stop = false;
+    this.updateDisplayButtons(false);
   }
 
   formatTime(seconds: number): string {
@@ -84,12 +77,12 @@ export class LaboralTimerComponent implements OnInit {
   createNewState(state: States) {
     return {
       dateTime: new Date(),
-      state: state
+      state: state,
     };
   }
 
   saveCurrentDateTime(state: States) {
-    let current = this.savedItems.find(item => item.current);
+    let current = this.savedItems.find((item) => item.current);
     if (current) {
       current.items.push(this.createNewState(state));
       if (state === States.Stop) {
@@ -98,7 +91,7 @@ export class LaboralTimerComponent implements OnInit {
     } else {
       this.savedItems.push({
         items: [this.createNewState(state)],
-        current: true
+        current: true,
       });
     }
     console.log(this.savedItems);
@@ -108,44 +101,62 @@ export class LaboralTimerComponent implements OnInit {
   readLocalStorage() {
     const lsData = localStorage.getItem('data');
     if (lsData) {
-      this.savedItems = JSON.parse(lsData).map((dat: any) => ({
-        items: dat.items.map((item: any) => ({
-          dateTime: new Date(item.dateTime),
-          state: item.state
-        })),
-        current: dat.current
-      }));
-      const current = this.savedItems.find(item => item.current);
+      this.savedItems = this.parseLocalStorageData(lsData);
+      const current = this.savedItems.find((item) => item.current);
       if (current) {
-        this.displayButtons.start = false;
-        this.displayButtons.pause = true;
-        this.displayButtons.stop = true;
-        const sortedItems = current.items.sort((a, b) => a.dateTime.getTime() - b.dateTime.getTime());
-        let elapsedTime = 0;
-        sortedItems.forEach((item, index) => {
-          if (item.state === States.Start) {
-            const nextItem = sortedItems[index + 1];
-            if (nextItem && nextItem.state === States.Pause) {
-              elapsedTime += nextItem.dateTime.getTime() - item.dateTime.getTime();
-            } else if (nextItem && nextItem.state === States.Stop) {
-              elapsedTime += new Date().getTime() - item.dateTime.getTime();
-            } else if (nextItem === undefined) {
-              elapsedTime += new Date().getTime() - item.dateTime.getTime();
-            }
-          }
-        });
-        //from elapsedtime to seconds
-        this.time = Math.round(elapsedTime/1000);
-        console.log(this.time);
+        this.updateDisplayButtons(true);
+        const sortedItems = this.sortItemsByDate(current.items);
+        this.time = this.calculateElapsedTime(sortedItems);
         this.timer = this.formatTime(this.time);
-        const lastState = sortedItems[sortedItems.length - 1].state;
-        if (lastState === States.Start) {
-          this.start(false);
-        } else if (lastState === States.Pause) {
-          this.pause(false);
-        }
-
+        this.updateLastState(sortedItems);
       }
+    }
+  }
+
+  parseLocalStorageData(lsData: string) {
+    return JSON.parse(lsData).map((dat: any) => ({
+      items: dat.items.map((item: any) => ({
+        dateTime: new Date(item.dateTime),
+        state: item.state,
+      })),
+      current: dat.current,
+    }));
+  }
+
+  updateDisplayButtons(start: boolean) {
+    this.displayButtons.start = !start;
+    this.displayButtons.pause = start;
+    this.displayButtons.stop = start;
+  }
+
+  sortItemsByDate(items: any[]) {
+    return items.sort((a, b) => a.dateTime.getTime() - b.dateTime.getTime());
+  }
+
+  calculateElapsedTime(sortedItems: any[]) {
+    let elapsedTime = 0;
+    sortedItems.forEach((item, index) => {
+      if (item.state === States.Start) {
+        const nextItem = sortedItems[index + 1];
+        if (nextItem && nextItem.state === States.Pause) {
+          elapsedTime += nextItem.dateTime.getTime() - item.dateTime.getTime();
+        } else if (nextItem && nextItem.state === States.Stop) {
+          elapsedTime += new Date().getTime() - item.dateTime.getTime();
+        } else if (nextItem === undefined) {
+          elapsedTime += new Date().getTime() - item.dateTime.getTime();
+        }
+      }
+    });
+    //from elapsedtime to seconds
+    return Math.round(elapsedTime / 1000);
+  }
+
+  updateLastState(sortedItems: any[]) {
+    const lastState = sortedItems[sortedItems.length - 1].state;
+    if (lastState === States.Start) {
+      this.start(false);
+    } else if (lastState === States.Pause) {
+      this.pause(false);
     }
   }
 }
