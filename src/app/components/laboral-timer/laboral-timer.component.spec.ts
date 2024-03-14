@@ -1,5 +1,5 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { LaboralTimerComponent } from './labora-timer.component';
+import { LaboralTimerComponent } from './laboral-timer.component';
 describe('LaboralTimerComponent', () => {
   let component: LaboralTimerComponent;
   let fixture: ComponentFixture<LaboralTimerComponent>;
@@ -8,7 +8,7 @@ describe('LaboralTimerComponent', () => {
     await TestBed.configureTestingModule({
       imports: [LaboralTimerComponent]
     })
-    .compileComponents();
+      .compileComponents();
 
     fixture = TestBed.createComponent(LaboralTimerComponent);
     component = fixture.componentInstance;
